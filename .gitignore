@@ -1,1 +1,15 @@
 **/__pycache__/
+
+.DS_Store
+
+__pycache__/
+*.pyc
+
+*_env/
+.venv*/
+
+virtualEnvForGame/
+
+online_resources_site/site/
+
+*.sqlite3
