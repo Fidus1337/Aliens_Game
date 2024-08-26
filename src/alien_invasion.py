@@ -1,10 +1,17 @@
 """Here is all logic for alien_invasion game"""
+# pylint: disable=no-member
 
+
+# For quit function
 import sys
 
+# For all functions related to game-development
 import pygame
 
+# The ship, which will be added to the screen
 from ship import Ship
+
+# Settings of the game
 from settings import Settings
 
 
@@ -19,9 +26,9 @@ class AlienInvasion:
         self.clock = pygame.time.Clock()
         self.settings = Settings()
 
-        # Set windows dimension
+        # Set windows dimension and make it fullscreen
         self.screen = pygame.display.set_mode(
-            (self.settings.screen_width, self.settings.screen_height))
+            (self.settings.screen_width, self.settings.screen_height), pygame.FULLSCREEN)
 
         # Set caption of the window
         pygame.display.set_caption("Alien invasion")
@@ -32,29 +39,39 @@ class AlienInvasion:
         # Init ship
         self.ship = Ship(self)
 
+    def _check_keydown_events(self, event):
+        """Checks keyup of the controllers and changes values"""
+        if event.key == pygame.K_RIGHT:
+            self.ship.moves_right = True
+        elif event.key == pygame.K_LEFT:
+            self.ship.moves_left = True
+        elif event.key == pygame.K_UP:
+            self.ship.moves_up = True
+        elif event.key == pygame.K_DOWN:
+            self.ship.moves_down = True
+
+    def _check_keyup_events(self, event):
+        """Checks keydown of the controllers and changes values"""
+        if event.key == pygame.K_RIGHT:
+            self.ship.moves_right = False
+        elif event.key == pygame.K_LEFT:
+            self.ship.moves_left = False
+        elif event.key == pygame.K_UP:
+            self.ship.moves_up = False
+        elif event.key == pygame.K_DOWN:
+            self.ship.moves_down = False
+
     def _check_events(self):
         """Respond to keypresses and mouse events"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    self.ship.moves_right = True
-                elif event.key == pygame.K_LEFT:
-                    self.ship.moves_left = True
-                elif event.key == pygame.K_UP:
-                    self.ship.moves_up = True
-                elif event.key == pygame.K_DOWN:
-                    self.ship.moves_down = True
+                if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
+                    sys.exit()
+                self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_RIGHT:
-                    self.ship.moves_right = False
-                elif event.key == pygame.K_LEFT:
-                    self.ship.moves_left = False
-                elif event.key == pygame.K_UP:
-                    self.ship.moves_up = False
-                elif event.key == pygame.K_DOWN:
-                    self.ship.moves_down = False
+                self._check_keyup_events(event)
 
     def _update_screen(self):
         """Filling with color screen, updating frames(limit 60 fps), show the ship"""
