@@ -14,6 +14,9 @@ from ship import Ship
 # Settings of the game
 from settings import Settings
 
+# Bullets
+from bullet import Bullet
+
 
 class AlienInvasion:
     """Overall class to manage game assets and behavior"""
@@ -24,11 +27,16 @@ class AlienInvasion:
 
         # Initialize clock for normal rate
         self.clock = pygame.time.Clock()
+
+        # Settings of the game
         self.settings = Settings()
+
+        # Initialize bullets group
+        self.bullets = pygame.sprite.Group()
 
         # Set windows dimension and make it fullscreen
         self.screen = pygame.display.set_mode(
-            (self.settings.screen_width, self.settings.screen_height), pygame.FULLSCREEN)
+            (self.settings.screen_width, self.settings.screen_height), pygame.RESIZABLE)
 
         # Set caption of the window
         pygame.display.set_caption("Alien invasion")
@@ -50,6 +58,12 @@ class AlienInvasion:
         elif event.key == pygame.K_DOWN:
             self.ship.moves_down = True
 
+    def fire_bullet(self):
+        """Add new bullet to the bullets array, which will update each frame"""
+        if len(self.bullets) < self.settings.bullets_allowed:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
+
     def _check_keyup_events(self, event):
         """Checks keydown of the controllers and changes values"""
         if event.key == pygame.K_RIGHT:
@@ -60,6 +74,8 @@ class AlienInvasion:
             self.ship.moves_up = False
         elif event.key == pygame.K_DOWN:
             self.ship.moves_down = False
+        elif event.key == pygame.K_SPACE:
+            self.fire_bullet()
 
     def _check_events(self):
         """Respond to keypresses and mouse events"""
@@ -73,6 +89,16 @@ class AlienInvasion:
             elif event.type == pygame.KEYUP:
                 self._check_keyup_events(event)
 
+    def _update_bullets(self):
+        """Update position of the bullets and get rid of the old bullets"""
+        # Update position of the bullets
+        self.bullets.update()
+
+        # Get rid of the old bullets
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <= 0:
+                self.bullets.remove(bullet)
+
     def _update_screen(self):
         """Filling with color screen, updating frames(limit 60 fps), show the ship"""
         # Redraw the screen during each pass through the loop.
@@ -80,22 +106,33 @@ class AlienInvasion:
 
         self.ship.blitme()
 
+        # Draw all bullets on the screen
+        for bullet in self.bullets.sprites():
+            bullet.draw_bullet()
+
         # Make the most recently drawn screen visible
         pygame.display.flip()
-
-        # Make 60 fps only
-        self.clock.tick(60)
 
     def run_game(self):
         """Start the main loop of the game"""
         while True:
             # Watch keyboard and mouse events
             self._check_events()
-            self._update_screen()
+
+            # Update ships position
             self.ship.update_position()
+
+            # Update bullets position and delete bullets which we already do not see on the screen
+            self._update_bullets()
+
+            # Update screen
+            self._update_screen()
+
+            # Make 60 fps only
+            self.clock.tick(60)
 
 
 if __name__ == '__main__':
-    # # Make a game instance, and run the game.
+    # Make a game instance, and run the game.
     ai = AlienInvasion()
     ai.run_game()
